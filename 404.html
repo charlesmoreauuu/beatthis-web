@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Join on BeatThis</title>
+  <link rel="stylesheet" href="/style.css">
+  <script>
+    // /join/CODE — when arriving here, try opening the BeatThis app.
+    // GitHub Pages serves this file for any 404. We parse the path
+    // and if it matches /join/<6 chars> we attempt the custom scheme,
+    // showing a friendly fallback if nothing handles it.
+    (function () {
+      var m = /^\/join\/([A-Z0-9]{6})\/?$/i.exec(window.location.pathname);
+      if (!m) return;
+      var code = m[1].toUpperCase();
+      document.documentElement.dataset.code = code;
+      // Try to open the app. If installed, the OS swaps us out. If not,
+      // the page stays visible and the user sees the fallback CTA.
+      setTimeout(function () {
+        window.location.href = 'beatthis://join/' + code;
+      }, 50);
+    })();
+  </script>
+  <style>
+    .code-block {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 28px;
+      letter-spacing: 6px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(255,107,91,0.08);
+      border: 1px solid var(--accent);
+      padding: 16px 24px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-top: 8px;
+    }
+    .cta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      margin-top: 32px;
+    }
+    .cta-row a {
+      display: inline-block;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      min-width: 240px;
+      text-align: center;
+      border-bottom: none;
+    }
+    .cta-row a:hover { background: #E85546; border-bottom: none; }
+    .cta-row a.ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .cta-row a.ghost:hover { color: white; border-color: white; }
+    .small {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 20px;
+    }
+    .join-page { text-align: center; padding-top: 60px; }
+  </style>
+</head>
+<body>
+  <div class="container join-page">
+    <div class="top-nav" style="justify-content: center;">
+      <a href="/" class="brand">BeatThis</a>
+    </div>
+
+    <p class="eyebrow">Group invite</p>
+    <h1>Join the group</h1>
+    <p class="tagline">A friend invited you to a daily challenge group on BeatThis.</p>
+
+    <div id="codeBlock" style="display:none;" class="code-block"></div>
+
+    <div class="cta-row">
+      <a id="openBtn" href="#">Open BeatThis</a>
+      <a class="ghost" href="https://apps.apple.com">Get BeatThis</a>
+    </div>
+
+    <p class="small">
+      Don't have BeatThis yet? Install it, then come back here and tap "Open BeatThis".
+    </p>
+
+    <div class="footer" style="margin-top: 80px;">
+      <p>&copy; 2026 BeatThis. <a href="/">Home</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Populate the code + the "Open" button once code is parsed.
+    (function () {
+      var code = document.documentElement.dataset.code;
+      if (!code) return;
+      var block = document.getElementById('codeBlock');
+      block.textContent = code;
+      block.style.display = 'inline-block';
+      var btn = document.getElementById('openBtn');
+      btn.href = 'beatthis://join/' + code;
+    })();
+  </script>
+</body>
+</html>
