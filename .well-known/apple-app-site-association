@@ -1,10 +1,12 @@
 {
   "applinks": {
-    "apps": [],
     "details": [
       {
-        "appID": "TEAMID.app.beatthis",
-        "paths": ["/join/*"]
+        "appIDs": ["YJBQ44DA6G.app.beatthis"],
+        "components": [
+          { "/": "/join/*" },
+          { "/": "/add/*" }
+        ]
       }
     ]
   }
