@@ -58,20 +58,23 @@
       var code = m[1].toUpperCase();
       var kind = join ? 'join' : 'add';
       if (kind === 'add') {
+        // Friends have no manual code entry in-app (add is via this link or
+        // name search only), so we do NOT show the code here.
         document.getElementById('eyebrow').textContent = 'Friend invite';
         document.getElementById('heading').textContent = 'Add me on BeatThis';
-        document.getElementById('tagline').textContent = 'Open the app to add each other as friends.';
-        document.getElementById('codeHint').textContent = 'Already have BeatThis? Open the app, tap Add, and enter this code.';
+        document.getElementById('tagline').textContent = 'Open BeatThis from this link and you will be added as friends automatically.';
       } else {
+        // Groups support manual "Join by code" in-app, so show the code as a fallback.
         document.getElementById('eyebrow').textContent = 'Group invite';
         document.getElementById('heading').textContent = 'Join the group';
         document.getElementById('tagline').textContent = 'A friend invited you to a daily challenge group on BeatThis.';
-        document.getElementById('codeHint').textContent = 'Already have BeatThis? Open the app, tap Join, and enter this code.';
+        var block = document.getElementById('codeBlock');
+        block.textContent = code;
+        block.style.display = 'inline-block';
+        var hint = document.getElementById('codeHint');
+        hint.textContent = 'Already have BeatThis? Open the app, tap Join, and enter this code.';
+        hint.style.display = 'block';
       }
-      var block = document.getElementById('codeBlock');
-      block.textContent = code;
-      block.style.display = 'inline-block';
-      document.getElementById('codeHint').style.display = 'block';
 
       // "Open BeatThis": try the app, and if nothing takes over quickly, send
       // the user to the App Store instead of a dead "address invalid" error.
