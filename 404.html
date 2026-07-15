@@ -35,12 +35,13 @@
     <h1 id="heading">Open in BeatThis</h1>
     <p class="tagline" id="tagline">A friend invited you on BeatThis.</p>
     <div id="codeBlock" style="display:none;" class="code-block"></div>
+    <p class="small" id="codeHint" style="display:none; margin-top:12px;"></p>
     <div class="cta-row">
-      <a id="openBtn" href="#">Open BeatThis</a>
-      <a class="ghost" href="https://apps.apple.com/app/beatthis-daily-challenges/id6780211717">Get BeatThis</a>
+      <a id="getBtn" href="https://apps.apple.com/app/beatthis-daily-challenges/id6780211717">Get BeatThis</a>
+      <a class="ghost" id="openBtn" href="#">Open BeatThis</a>
     </div>
     <p class="small">
-      Have the app? Tap "Open BeatThis". Don't have it yet? Tap "Get BeatThis", install it, then reopen this link.
+      New here? Tap "Get BeatThis" to install, then reopen this link. Already have it? Tap "Open BeatThis".
     </p>
     <div class="footer" style="margin-top: 80px;">
       <p>&copy; 2026 BeatThis. <a href="/">Home</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a></p>
@@ -48,6 +49,7 @@
   </div>
   <script>
     (function () {
+      var STORE_URL = 'https://apps.apple.com/app/beatthis-daily-challenges/id6780211717';
       var path = window.location.pathname;
       var join = /^\/join\/([A-Z0-9]{6})\/?$/i.exec(path);
       var add  = /^\/add\/([A-Z0-9]{6})\/?$/i.exec(path);
@@ -59,16 +61,36 @@
         document.getElementById('eyebrow').textContent = 'Friend invite';
         document.getElementById('heading').textContent = 'Add me on BeatThis';
         document.getElementById('tagline').textContent = 'Open the app to add each other as friends.';
+        document.getElementById('codeHint').textContent = 'Already have BeatThis? Open the app, tap Add, and enter this code.';
       } else {
         document.getElementById('eyebrow').textContent = 'Group invite';
         document.getElementById('heading').textContent = 'Join the group';
         document.getElementById('tagline').textContent = 'A friend invited you to a daily challenge group on BeatThis.';
+        document.getElementById('codeHint').textContent = 'Already have BeatThis? Open the app, tap Join, and enter this code.';
       }
       var block = document.getElementById('codeBlock');
       block.textContent = code;
       block.style.display = 'inline-block';
-      // User-tap only. No auto-redirect (iOS blocks non-gesture custom-scheme navigation).
-      document.getElementById('openBtn').href = 'beatthis://' + kind + '/' + code;
+      document.getElementById('codeHint').style.display = 'block';
+
+      // "Open BeatThis": try the app, and if nothing takes over quickly, send
+      // the user to the App Store instead of a dead "address invalid" error.
+      var deeplink = 'beatthis://' + kind + '/' + code;
+      var openBtn = document.getElementById('openBtn');
+      openBtn.href = deeplink;
+      openBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var hidden = false;
+        function onHide() { hidden = true; }
+        document.addEventListener('visibilitychange', onHide);
+        window.addEventListener('pagehide', onHide);
+        setTimeout(function () {
+          document.removeEventListener('visibilitychange', onHide);
+          window.removeEventListener('pagehide', onHide);
+          if (!hidden && !document.hidden) window.location = STORE_URL;
+        }, 1200);
+        window.location = deeplink;
+      });
     })();
   </script>
 </body>
