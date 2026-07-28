@@ -76,6 +76,21 @@
         hint.style.display = 'block';
       }
 
+      // Copy the invite URL to the clipboard on any CTA tap (must be tied to a
+      // user gesture — mobile browsers block clipboard writes on load). A NEW
+      // install can't receive the link through the App Store (iOS drops it), but
+      // the clipboard survives, so the app reads it on first launch and connects
+      // the friend automatically (deferred deep link).
+      function copyInvite() {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(window.location.href);
+          }
+        } catch (e) {}
+      }
+      var getBtn = document.getElementById('getBtn');
+      if (getBtn) getBtn.addEventListener('click', copyInvite);
+
       // "Open BeatThis": try the app, and if nothing takes over quickly, send
       // the user to the App Store instead of a dead "address invalid" error.
       var deeplink = 'beatthis://' + kind + '/' + code;
@@ -83,6 +98,7 @@
       openBtn.href = deeplink;
       openBtn.addEventListener('click', function (e) {
         e.preventDefault();
+        copyInvite();
         var hidden = false;
         function onHide() { hidden = true; }
         document.addEventListener('visibilitychange', onHide);
