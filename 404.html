@@ -138,7 +138,21 @@
           window.removeEventListener('pagehide', onHide);
           if (!hidden && !document.hidden) window.location = STORE_URL;
         }, 1200);
-        window.location = deeplink;
+        // Attempt the app via a HIDDEN IFRAME instead of window.location: a
+        // custom-scheme navigation that fails inside an iframe does NOT trigger
+        // Safari's "address invalid" alert (which is what a top-level
+        // window.location = 'beatthis://…' shows when the app isn't installed).
+        // If the app is installed it takes over and the page hides (cancelling
+        // the App Store fallback above); if not, it fails silently and we fall
+        // back to the store.
+        try {
+          var frame = document.createElement('iframe');
+          frame.style.display = 'none';
+          frame.src = deeplink;
+          document.body.appendChild(frame);
+        } catch (err) {
+          window.location = deeplink;
+        }
       });
     })();
   </script>
