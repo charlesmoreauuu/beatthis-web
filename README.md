@@ -1,66 +1,73 @@
-# chamor-legal
+# beatthis-web
 
-Static legal pages for [chamor.app](https://chamor.app).
+Static site for [beatthis.me](https://beatthis.me): the landing page, the legal
+pages, and the invite-link handler for the BeatThis iOS app.
 
 ## Pages
 
-- `/` &mdash; minimal landing with links to the two policies
-- `/privacy` &mdash; Privacy Policy
-- `/terms` &mdash; Terms of Service
+- `/` &rarr; landing page with links to the two policies
+- `/privacy` &rarr; Privacy Policy
+- `/terms` &rarr; Terms of Service
+- `/join/<CODE>` &rarr; group invite: opens the app, or offers the App Store
+- `/add/<CODE>` &rarr; friend invite: same flow, friend-code wording
 
-## Deploying to chamor.app via Cloudflare Pages
+GitHub Pages serves `privacy.html` and `terms.html` at their extensionless
+paths too, so `/privacy` and `/terms` both work. The app links to the
+`.html` form (`components/Settings.js`, `components/Auth.js` in the app repo).
 
-### One-time setup (~15 min)
+`404.html` is not just an error page. GitHub Pages has no server-side routing,
+so every unmatched path falls through to it, and its inline script parses
+`/join/<CODE>` and `/add/<CODE>` out of `window.location.pathname` and drives
+the open-or-install flow. Editing `404.html` means editing the invite landing
+page. The App Store id is hardcoded there (`id6780211717`).
 
-1. **Create a GitHub repo.**
-   ```sh
-   cd ~/Desktop/chamor-legal
-   git init
-   git add .
-   git commit -m "Initial chamor-legal"
-   gh repo create chamor-legal --public --source=. --push
-   ```
-   (Or use the web UI if `gh` isn't installed.)
+## Hosting
 
-2. **Sign in to Cloudflare** at https://dash.cloudflare.com (free tier is enough).
+GitHub Pages, deployed from the `main` branch at the repo root. There is no
+build step and no framework. Push to `main` and Pages republishes in about a
+minute.
 
-3. **Add chamor.app to Cloudflare.**
-   - Dashboard &rarr; "Add a site" &rarr; type `chamor.app` &rarr; Free plan.
-   - Cloudflare gives you two nameservers (e.g. `dale.ns.cloudflare.com`, `ines.ns.cloudflare.com`).
-   - At Namecheap: Domain List &rarr; Manage &rarr; Nameservers &rarr; Custom DNS &rarr; paste both.
-   - Wait for propagation (anywhere from a few minutes to 24h; usually under 1h).
+Two files matter to the deploy and are easy to delete by accident:
 
-4. **Re-add DNS records you need.**
-   When you move nameservers to Cloudflare, your existing DNS records (Resend DKIM/SPF/DMARC for `noreply@chamor.app`) must be recreated in Cloudflare.
-   - In Cloudflare &rarr; chamor.app &rarr; DNS &rarr; Records, re-add:
-     - the **MX**, **TXT (SPF)**, **CNAME (DKIM)**, and **TXT (DMARC)** records from your Resend setup
-   - Verify in Resend dashboard that the domain still shows green.
+- `CNAME` pins the custom domain to `beatthis.me`. DNS is four apex `A`
+  records pointing at GitHub Pages, set at the registrar.
+- `.nojekyll` disables Jekyll. Without it Jekyll strips dot-prefixed
+  directories from the output and `.well-known/` never publishes, which
+  silently breaks Universal Links.
 
-5. **Create the Pages project.**
-   - Cloudflare dashboard &rarr; "Workers & Pages" &rarr; "Create" &rarr; "Pages" &rarr; "Connect to Git".
-   - Select your `chamor-legal` repo.
-   - Build settings: leave everything blank (no build command, no build output directory &mdash; static files at the repo root).
-   - Click "Save and Deploy". You'll get a `chamor-legal.pages.dev` URL.
+`.well-known/apple-app-site-association` is the Universal Links manifest. It
+carries the real Team ID and app ID (`YJBQ44DA6G.app.beatthis`) and must stay
+in sync with `associatedDomains` in the app's `app.json`. It is served as
+plain JSON with no extension, which is what Apple expects.
 
-6. **Attach custom domain.**
-   - In the Pages project &rarr; "Custom domains" &rarr; "Set up a custom domain" &rarr; `chamor.app`.
-   - Cloudflare auto-creates the CNAME for you.
-   - Visit https://chamor.app and confirm the landing page loads. `/privacy` and `/terms` should work without `.html` (Cloudflare Pages handles that automatically).
-
-### Updating later
+## Updating
 
 ```sh
-cd ~/Desktop/chamor-legal
-# edit privacy.html / terms.html / style.css
+git clone https://github.com/charlesmoreauuu/beatthis-web.git
+cd beatthis-web
+# edit index.html / privacy.html / terms.html / 404.html / style.css
 git add . && git commit -m "Update privacy: ..."
 git push
 ```
-Cloudflare auto-rebuilds on push (~30s).
+
+Then confirm the live page, since there is no staging environment:
+
+```sh
+curl -sI https://beatthis.me/privacy.html | head -1
+```
 
 ## Notes on the documents
 
-These are good-faith templates, not legal advice. They reflect what Chamor actually does (Supabase + Resend + Expo, no analytics, no ads) and cover the common bases (GDPR, CCPA, App Store guidelines 1.2 and 5.1.1). Before shipping to App Store production, have them reviewed by a lawyer who handles consumer-mobile apps in your jurisdiction.
+These are good-faith templates, not legal advice. They reflect what BeatThis
+actually does (Supabase + Resend + Expo, no analytics, no ads) and cover the
+common bases (GDPR, CCPA, App Store guidelines 1.2 and 5.1.1). Before shipping
+to App Store production, have them reviewed by a lawyer who handles
+consumer-mobile apps in your jurisdiction.
 
 When you make material changes to either document:
-- Update the &ldquo;Effective&rdquo; date at the top
+
+- Update the "Effective" date at the top
 - Tell users in-app (a one-time toast or a settings indicator)
+
+Contact address on all three pages is `support@beatthis.me`, forwarded to a
+personal inbox via ImprovMX.
